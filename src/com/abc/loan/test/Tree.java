@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Map.Entry;
+
 import java.io.IOException;
 import java.io.Writer;
 
@@ -42,23 +44,72 @@ public class Tree {
 	        return node;
 	    }
 	    
+	    TreeMap<String, LoanType> nodeMap = new TreeMap<String, LoanType>();
+	    
+	    @SuppressWarnings("unchecked")
+		public void buildNodeSet(String parent) throws Exception{
+	    	List<LoanType> loanTypeLists = new ArrayList<LoanType>();
+	    	loanTypeLists =  LoanDelegate.getLoanTypes();
+			Map.Entry<String, LoanType> temp = null;
+	
+			for (int i=0; i<loanTypeLists.size(); i++){			
+		 		temp =(Entry<String, LoanType>) loanTypeLists.get(i);
+	
+				if (!temp.getKey().equals("ALL")) {
+					nodeMap.put(temp.getKey(), temp.getValue());
+				}		
+	    	}
+			
+	    }
+	    
+	    @SuppressWarnings("unchecked")
+		public void displayNodeSet(String identifier, int depth, Writer out) throws Exception {
+	    	    Loan loan = new Loan(null, null, null, null, null, 0, 0);
+		        List<Loan> reportLists = new ArrayList<Loan>();
+				reportLists = LoanDelegate.getLoans();
+				Boolean titlePrinted = true;
+				
+				for(Map.Entry<String, LoanType> m:nodeMap.entrySet()) {	
+					for (int i = 0; i<reportLists.size(); i++ ) {						
+						loan = reportLists.get(i);	
+															
+						if (loan.getLoanType().getId().equals(m.getKey())) {													
+							if (titlePrinted) {
+								System.out.println(loan.getLoanType().getName());
+								System.out.println("--------------------------------------------");
+
+								out.append(loan.getLoanType().getName()).append("\r\n");
+								out.append("--------------------------------------------").append("\r\n");
+								titlePrinted = false;
+							}							
+							showLoanDetails(loan, "");
+							writeLoanDetails(loan, "", out);
+						} 		
+					}
+		            
+		            System.out.println();
+		            titlePrinted = true;
+	       
+				}        
+				
+		    }
+	    
 		@SuppressWarnings("unchecked")
 		public void buildTree(String parent) throws Exception{
 	    	Tree tree = new Tree();
 	    	List<LoanType> loanTypeLists = new ArrayList<LoanType>();
-	    	loanTypeLists =  LoanDelegate.getLoanTypes();
+	    	loanTypeLists =  LoanDelegate.getLoanTypes();	
 	    	String loanTypeId = null;
-			String parentLoanTypeId = null;	    	
+			String parentLoanTypeId = null;	    
 			Map.Entry<String, LoanType> temp = null;
-			LoanType loanType = new LoanType();
+			LoanType loanType = new LoanType();			
+			List<String> children = new ArrayList<String>();			
+						
+			for (int i=0; i<loanTypeLists.size(); i++){
 			
-			List<String> children = new ArrayList<String>();
-	    	for (int i=0; i<loanTypeLists.size(); i++){
-			    
 		 		temp =(Entry<String, LoanType>) loanTypeLists.get(i);
-
 				loanTypeId = temp.getKey();
-							
+		
 				if (loanTypeId != "ALL") {
 					loanType = LoanDelegate.getLoanType(loanTypeId);
 					parentLoanTypeId = loanType.getParentType().getId();
@@ -69,10 +120,10 @@ public class Tree {
 					}
 				}
 	    	}
-	   
-	    	 for (String child : children) {
+		
+	    	for (String child : children) {
 	    		 this.buildTree(child);
-	    	 }
+	    	}
 	    }
 	    
 	    public void display(String identifier) throws Exception {
@@ -113,7 +164,9 @@ public class Tree {
 				}   
 	            System.out.println();
 	        }
+	        
 	        depth++;
+	        
 	        for (String child : children) {
 	            // Recursive call
 	            this.display(child, depth, out);
@@ -130,13 +183,10 @@ public class Tree {
 			String parentLoanTypeId = null;	    	
 			Map.Entry<String, LoanType> temp = null;
 			LoanType loanType = new LoanType();
-			
 			List<String> children = new ArrayList<String>();
-			Collections.sort(children);
+	
 			for (int i=0; i<loanTypeLists.size(); i++){
-			    
-		 		temp =(Entry<String, LoanType>) loanTypeLists.get(i);
-
+			    temp =(Entry<String, LoanType>) loanTypeLists.get(i);
 				loanTypeId = temp.getKey();
 							
 				if (loanTypeId != "ALL") {
@@ -161,18 +211,9 @@ public class Tree {
 	    
 	    @SuppressWarnings("unchecked")
 		public void display1(String identifier, int depth, Writer out) throws Exception {
-		    	
 	        ArrayList<String> children = nodes.get(identifier).getChildren();
-	    
-	//        System.out.println("depth = " + depth);     
-	//        System.out.println("size = " + children.size());
-	     
-	//        if (children.size() == 0){	        
-	        
-	//        Collections.sort(children);  
-	//        }                                                                                                                                                                                                                                                                                                                                                                                                                                                       
-       
-	        Loan loan = new Loan(null, null, null, null, null, 0, 0);
+                                                                                                                                                                
+            Loan loan = new Loan(null, null, null, null, null, 0, 0);
 	        List<Loan> reportLists = new ArrayList<Loan>();
 			
 			reportLists = LoanDelegate.getLoans();
@@ -180,6 +221,7 @@ public class Tree {
 						
 	            for (int i=0; i<reportLists.size(); i++ ){
 					loan = reportLists.get(i);
+							
 					if (loan.getLoanType().getId().equals(identifier)) {
 												
 						if (titlePrinted) {
@@ -200,10 +242,8 @@ public class Tree {
 	            titlePrinted = true;
        
 	        depth++;
-	        	        
+        
 	        for (String child : children) {
-	        //	 System.out.println("child: " + child);
-	        //	 System.out.println("depth: " + depth);
 	            this.display1(child, depth, out);
 	        }	    
 	    }
@@ -236,9 +276,9 @@ public class Tree {
 	    
 	    public static double sumPayments(Loan loan){
 			double sumPayments = 0;
-			Payment payment = new Payment(loan, null, null, 0);
-			
+			Payment payment = new Payment(loan, null, null, 0);			
 			List paymentList = new ArrayList();
+			
 			try {
 				paymentList = LoanDelegate.getPayments(loan);
 			} catch (Exception e) {

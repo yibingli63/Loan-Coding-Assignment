@@ -2,12 +2,17 @@ package com.abc.loan.test;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.abc.loan.data.Loan;
 import com.abc.loan.data.LoanType;
@@ -32,12 +37,32 @@ public class LoanTest
 			test.testAllLoansReport();
 			test.testLoansByTypeReport();
 			test.testLoanTypeHierarchyReport();
+			test.traveseTree();
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 
+	}
+
+	public void traveseTree() throws Exception {
+		Tree tree = new Tree();
+		File fileDir = new File("c:\\temp\\report-D.txt");
+   	 
+		Writer out = new BufferedWriter(new OutputStreamWriter(
+			new FileOutputStream(fileDir), "UTF8"));
+		
+		System.out.println("Report D");
+		System.out.println("--------------------------------------------------------");	
+		out.append("Report D").append("\r\n");
+		out.append("--------------------------------------------------------").append("\r\n");
+	
+		tree.addNode("ALL");
+		tree.buildTree("ALL");	
+		tree.display1("ALL", 0, out);
+		out.flush();
+		out.close();		
 	}
 	
 	/**
@@ -91,10 +116,10 @@ public class LoanTest
 		System.out.println("--------------------------------------------------------");	
 		out.append("Report B").append("\r\n");
 		out.append("--------------------------------------------------------").append("\r\n");
-			
+	
 		tree.addNode("ALL");
-		tree.buildTree("ALL");		
-		tree.display1("ALL", 0, out);
+		tree.buildNodeSet("All");
+		tree.displayNodeSet("ALL", 0, out);
 		out.flush();
 		out.close();
 	}
